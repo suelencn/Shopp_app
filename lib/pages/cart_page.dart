@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/orders.dart';
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart' as ci;
 
@@ -12,7 +13,7 @@ class CartPage extends StatelessWidget {
     final cartValues = cart.items.values.toList();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your Cart'),
+        title: const Text('Your Cart'),
       ),
       body: Column(
         children: [
@@ -30,7 +31,7 @@ class CartPage extends StatelessWidget {
                   const Spacer(),
                   Chip(
                     label: Text(
-                      'R\$${cart.totalAmount}',
+                      'R\$${cart.totalAmount.toStringAsFixed(2)}',
                       style: TextStyle(
                           color: Theme.of(context)
                               .primaryTextTheme
@@ -40,7 +41,13 @@ class CartPage extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(
+                        cartValues,
+                        cart.totalAmount,
+                      );
+                      cart.clear();
+                    },
                     textColor: Theme.of(context).primaryColor,
                     child: const Text('ORDER NOW'),
                   )
@@ -48,13 +55,14 @@ class CartPage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Expanded(
               child: ListView.builder(
             itemBuilder: ((ctx, index) => ci.CartItem(
                   cartValues[index].id,
+                  cart.items.keys.toList()[index],
                   cartValues[index].price,
                   cartValues[index].quantity,
                   cartValues[index].title,
