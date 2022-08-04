@@ -30,7 +30,10 @@ class UserProductsPage extends StatelessWidget {
           itemBuilder: (ctx, i) => (Column(
             children: [
               UserProductItem(
-                  productsData.items[i].imageUrl, productsData.items[i].title),
+                productsData.items[i].id,
+                productsData.items[i].imageUrl,
+                productsData.items[i].title,
+              ),
               const Divider(),
             ],
           )),
