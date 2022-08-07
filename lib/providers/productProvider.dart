@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'product.dart';
 
@@ -54,17 +57,70 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-    );
-    _items.add(newProduct);
-    notifyListeners();
+  //MÉTODO ADD PRODUCT USANDO ASYNC, AWAIT, TRY CATCH
+  Future<void> addProduct(Product product) async {
+    final url = Uri.parse(
+        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products.json');
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavorite': product.isFavorite,
+        }),
+      );
+      print(jsonDecode(response.body));
+      final newProduct = Product(
+        id: jsonDecode(response.body)['name'],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+      );
+      _items.add(newProduct);
+      notifyListeners();
+      return Future.delayed(const Duration(seconds: 3));
+    } catch (error) {
+      print(error);
+      throw error;
+    }
   }
+
+  //MÉTODO ADD PRODUCT USANDO FUTURE
+  // Future<void> addProduct(Product product) {
+  //   final url = Uri.parse(
+  //       'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products.json');
+  //   return http
+  //       .post(
+  //     url,
+  //     body: json.encode({
+  //       'title': product.title,
+  //       'description': product.description,
+  //       'imageUrl': product.imageUrl,
+  //       'price': product.price,
+  //       'isFavorite': product.isFavorite,
+  //     }),
+  //   )
+  //       .then((response) {
+  //     print(jsonDecode(response.body));
+  //     final newProduct = Product(
+  //       id: jsonDecode(response.body)['name'],
+  //       title: product.title,
+  //       description: product.description,
+  //       price: product.price,
+  //       imageUrl: product.imageUrl,
+  //     );
+  //     _items.add(newProduct);
+  //     notifyListeners();
+  //     return Future.delayed(const Duration(seconds: 3));
+  //   }).catchError((error) {
+  //     print(error);
+  //     throw error;
+  //   });
+  // }
 
   void updateProduct(String id, Product newProduct) {
     final prodIndex = _items.indexWhere((element) => element.id == id);
