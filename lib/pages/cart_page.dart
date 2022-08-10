@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/cart.dart';
 
 import '../providers/orders.dart';
 import '../providers/cart.dart' show Cart;
@@ -40,17 +41,7 @@ class CartPage extends StatelessWidget {
                     ),
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      Provider.of<Orders>(context, listen: false).addOrder(
-                        cartValues,
-                        cart.totalAmount,
-                      );
-                      cart.clear();
-                    },
-                    textColor: Theme.of(context).primaryColor,
-                    child: const Text('ORDER NOW'),
-                  )
+                  OrderButton(cart: cart, cartValues: cartValues)
                 ],
               ),
             ),
@@ -71,6 +62,46 @@ class CartPage extends StatelessWidget {
           ))
         ],
       ),
+    );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  OrderButton({
+    required this.cart,
+    required this.cartValues,
+  });
+
+  final Cart cart;
+  final List<CartItem> cartValues;
+
+  @override
+  State<OrderButton> createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: (widget.cart.totalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await Provider.of<Orders>(context, listen: false).addOrder(
+                widget.cartValues,
+                widget.cart.totalAmount,
+              );
+              setState(() {
+                _isLoading = false;
+              });
+              widget.cart.clear();
+            },
+      textColor: Theme.of(context).primaryColor,
+      child: _isLoading ? CircularProgressIndicator() : const Text('ORDER NOW'),
     );
   }
 }
