@@ -42,6 +42,10 @@ class Products with ChangeNotifier {
     // ),
   ];
 
+  final String? authToken;
+
+  Products(this.authToken, this._items);
+
   List<Product> get items {
     return [..._items];
   }
@@ -60,7 +64,7 @@ class Products with ChangeNotifier {
 
   Future<void> fetchAndsetProducts() async {
     final url = Uri.parse(
-        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products.json');
+        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.get(url);
       //print(json.decode(response.body));
@@ -91,7 +95,7 @@ class Products with ChangeNotifier {
   //MÉTODO ADD PRODUCT USANDO ASYNC, AWAIT, TRY CATCH
   Future<void> addProduct(Product product) async {
     final url = Uri.parse(
-        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products.json');
+        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.post(
         url,
@@ -157,7 +161,7 @@ class Products with ChangeNotifier {
     final prodIndex = _items.indexWhere((element) => element.id == id);
     if (prodIndex >= 0) {
       final url = Uri.parse(
-          'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products/$id.json');
+          'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
       await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
@@ -172,7 +176,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     final url = Uri.parse(
-        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products/$id.json');
+        'https://shoppapp-5ba67-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     final existingProductIndex =
         _items.indexWhere((element) => element.id == id);
     Product? existingProduct = _items[existingProductIndex];
