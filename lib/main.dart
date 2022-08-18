@@ -12,6 +12,7 @@ import '../pages/orders_page.dart';
 import '../pages/userProducts_page.dart';
 import '../pages/editProduct_page.dart';
 import '../pages/auth_page.dart';
+import '../pages/splash_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,20 +28,26 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<Auth, Products>(
           update: (ctx, auth, previousProducts) => Products(
-            auth.token as String,
+            auth.token ?? '',
+            auth.userId ?? '',
             previousProducts == null ? [] : previousProducts.items,
           ),
-          create: (ctx) => Products(null, []),
+          create: (ctx) => Products(
+            null,
+            '',
+            [],
+          ),
         ),
         ChangeNotifierProvider(
           create: (ctx) => Cart(),
         ),
         ChangeNotifierProxyProvider<Auth, Orders>(
           update: (ctx, auth, previousOrders) => Orders(
-            auth.token as String,
+            auth.token ?? '',
+            auth.userId ?? '',
             previousOrders == null ? [] : previousOrders.orders,
           ),
-          create: (ctx) => Orders(null, []),
+          create: (ctx) => Orders(null, null, []),
         ),
       ],
       child: Consumer<Auth>(
@@ -50,7 +57,15 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.deepOrange,
               accentColor: Colors.deepOrangeAccent,
             ),
-            home: auth.isAuth ? ProductsOverviewPage() : AuthScreen(),
+            home: auth.isAuth
+                ? ProductsOverviewPage()
+                : FutureBuilder(
+                    future: auth.tryAutoLogin(),
+                    builder: (ctx, authResulSnapshot) =>
+                        authResulSnapshot.connectionState ==
+                                ConnectionState.waiting
+                            ? SplashPage()
+                            : AuthScreen()),
             //home: ProductsOverviewPage(),
             routes: {
               ProductDetailPage.routeName: (ctx) => ProductDetailPage(),
